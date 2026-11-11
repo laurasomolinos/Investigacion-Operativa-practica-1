@@ -1,5 +1,12 @@
+# Versiones con las que se han generado los resultados entregados:
+#   torch 2.15.0, torchvision 0.29.2, scikit-learn 1.9.1, numpy 2.5.3, pandas 3.0.5, matplotlib 3.11.2
+# (cualquier versión reciente debería funcionar, pero las décimas de los resultados pueden variar un poco)
 torch
 torchvision
 scikit-learn
+joblib
 numpy
+pandas
 matplotlib
+jupyter
+ipykernel

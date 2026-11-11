@@ -1,0 +1,7 @@
+Conjunto,CNN base,CNN adversaria,SVM base,SVM adversaria
+"Train: Adversarias (1 ataque, contra CNN base)",23.063333333333333,99.91333333333333,53.53333333333333,100.0
+Train: Doblemente adversarias (contra CNN adversaria),16.336666666666666,0.19,29.591666666666665,10.878333333333332
+Train: Doblemente adversarias (contra SVM adversaria),17.028333333333336,0.03833333333333334,1.5316666666666665,0.006666666666666667
+"Test: Adversarias (1 ataque, contra CNN base)",23.91,99.78,52.56999999999999,99.55000000000001
+Test: Doblemente adversarias (contra CNN adversaria),17.07,0.22999999999999998,30.34,11.940000000000001
+Test: Doblemente adversarias (contra SVM adversaria),17.349999999999998,0.05,1.63,0.0

@@ -1,5 +1,17 @@
-"""Ataque FGSM implementado manualmente para la CNN entrenada en MNIST.
-Ejecutar: python fgsm.py
+"""Apartado 3: ataque FGSM (Fast Gradient Sign Method) implementado a mano para la CNN de MNIST.
+
+Ejecutar: python fgsm.py     (genera ejemplos_fgsm.png con 6 dígitos originales y adversarios)
+
+FGSM (Goodfellow et al., 2015) modifica cada píxel un máximo de epsilon en la dirección que
+MÁS AUMENTA la pérdida del modelo:
+
+    x_adv = clip( x + epsilon * sign( d L(f(x), y) / d x ), 0, 1 )
+
+- Solo se usa PyTorch para calcular el gradiente (torch.autograd.grad); el signo, la
+  perturbación y el recorte están escritos aquí, sin librerías de ataques adversarios.
+- La perturbación está acotada en norma L-infinito: ningún píxel cambia más de epsilon.
+- Como solo importa el SIGNO del gradiente, que la pérdida sea la media del lote no altera el
+  resultado (dividir por el tamaño del lote no cambia el signo).
 """
 from pathlib import Path
 
@@ -35,7 +47,7 @@ def ataque_fgsm(modelo: nn.Module, imagenes: torch.Tensor,
     entrada = imagenes.detach().clone().requires_grad_(True)
     logits = modelo(entrada) #forward pass
     perdida = nn.functional.cross_entropy(logits, etiquetas) #perdida 
-    #xalculamos únicamente el gradiente respecto a las imágenes sin a acumular o actualizar los pesos de la CNN
+    #calculamos únicamente el gradiente respecto a las imágenes, sin acumular gradientes ni actualizar los pesos de la CNN
     gradiente = torch.autograd.grad(perdida, entrada)[0]
 
     #FGSM: perturbamos cada píxel en la dirección que aumenta la pérdida
@@ -52,11 +64,11 @@ def main() -> None:
         raise FileNotFoundError(f"No encuentro {ruta_pesos}. Conserva el modelo del apartado 1.")
 
     modelo = CNNMNIST()
-    #cargamos los pesos de la CNN entrenada state_dict porque asigna los paraametros guardados a nuestro modelo
+    #cargamos el state_dict: asigna los parámetros guardados a una CNN con la misma arquitectura
     modelo.load_state_dict(torch.load(ruta_pesos, map_location="cpu", weights_only=True))
     modelo.eval()
 
-    #10000 imagenes de test 
+    #10.000 imágenes de test
     prueba = datasets.MNIST(root=CARPETA / "datos", train=False, download=True, transform=transforms.ToTensor())
 
     #6 ejemplos reproducibles, uno por una clase distinta, para visualizar.

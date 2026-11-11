@@ -1,4 +1,14 @@
-"""Entrena una SVM gaussiana (RBF) sobre MNIST, en CPU y con semilla fija."""
+"""Apartado 2: entrena una SVM con núcleo gaussiano (RBF) sobre MNIST, en CPU y con semilla fija.
+
+Ejecutar:  python entrenar_svm.py     (tarda ~1 min; guarda svm_rbf_mnist.joblib)
+
+Decisiones de diseño
+- Se entrena con 60.000 imágenes de train:
+  el coste de SVC crece aproximadamente con n^2 y con 60.000 sería demasiado lento en CPU.
+- Los píxeles se dejan en [0, 1] (sin más normalización), igual que en la CNN, de modo que
+  el mismo epsilon del ataque significa lo mismo para los dos modelos.
+- Clasificación multiclase "uno contra uno": 45 clasificadores binarios y voto de mayoría.
+"""
 
 from pathlib import Path
 import random
@@ -11,9 +21,9 @@ from sklearn.svm import SVC
 from torchvision import datasets, transforms
 
 SEMILLA = 42
-MUESTRAS_ENTRENAMIENTO = 12000  #para no disparar el coste de SVC en CPU se divide el conjunto de entrenamiento 
+MUESTRAS_ENTRENAMIENTO = 60000 
 C = 10.0 #regulación de penalización de violaciones de margen 
-GAMMA = "scale" #control del nucleo gaussiano: "scale" = 1/(n_features * X.var()) = 1/(784 * 0.083) = 0.0154
+GAMMA = "scale" #control del nucleo gaussiano: "scale" = 1/(n_features * X.var()) = 1/(784 * 0.09498) = 0.013429 (con estos 60.000 datos)
 CARPETA = Path(__file__).resolve().parent
 
 
@@ -26,11 +36,11 @@ def cargar_datos():
     # SVC necesita una fila por imagen y una columna por píxel (784 características).
     # ToTensor convierte los píxeles de 0..255 al rango 0..1.
     rng = np.random.default_rng(SEMILLA) 
-    indices = rng.choice(len(entrenamiento), MUESTRAS_ENTRENAMIENTO, replace=False) #elegir las 12000 imagenes sin reemplazo
+    indices = rng.choice(len(entrenamiento), MUESTRAS_ENTRENAMIENTO, replace=False)
     #dividimos conjunto de entrenamiento y test: 
-    # - cada imagen de 28x28 a vector de 784 elementos (12000,28,28) -> (12000,784)
+    # - cada imagen de 28x28 a vector de 784 elementos (60000,28,28) -> (60000,784)
     X_train = entrenamiento.data[indices].numpy().reshape(-1, 784).astype(np.float32) / 255.0
-    #etiquetas reales de las 12000 imagenes elegidas
+    #etiquetas reales de las imagenes 
     y_train = entrenamiento.targets[indices].numpy()
     # -misma transformación para test (10000,28,28) -> (10000,784)
     X_test = prueba.data.numpy().reshape(-1, 784).astype(np.float32) / 255.0
@@ -49,7 +59,7 @@ def main():
     print(f"Kernel RBF | C={C} | gamma={GAMMA}")
 
     #Configuramos y creamos la SVM con kernel gaussiano 
-    #kernel ="rbf" SVM construya fronteras no lineales
+    #kernel="rbf": la SVM construye fronteras de decisión no lineales (núcleo K(x,z)=exp(-gamma·||x-z||²))
     modelo = SVC(kernel="rbf", C=C, gamma=GAMMA, cache_size=512)
     inicio = time.perf_counter() #contamos lo que tarda en entrenar
     modelo.fit(X_train, y_train)
