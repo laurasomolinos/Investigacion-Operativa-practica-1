@@ -1,0 +1,4 @@
+Ataque contra la CNN adversaria (test),Precisión CNN adversaria (%)
+"FGSM desde la original, eps=0.2",1.34
+"FGSM doble (adversaria→adversaria), eps=0.2 dos veces",0.22999999999999998
+"FGSM desde la original, eps=0.4",0.06

@@ -1,7 +1,19 @@
-"""Entrena una CNN para reconocer los dígitos del conjunto MNIST.
+"""Apartado 1: entrena una CNN para reconocer los dígitos del conjunto MNIST.
+
+Ejecutar:  python entrenar_cnn.py     (guarda cnn_mnist.pth)
 
 Se utiliza PyTorch, con semillas fijas para facilitar la reproducción del experimento.
 El entrenamiento se realiza en CPU y guarda los pesos para usarlos después en FGSM.
+
+Arquitectura (105.866 parámetros):
+  Conv(1→16, 3x3) → ReLU → MaxPool  →  Conv(16→32, 3x3) → ReLU → MaxPool  →
+  Flatten(1568) → Linear(1568→64) → ReLU → Linear(64→10)
+  Parámetros: 160 + 4.640 + 100.416 + 650 = 105.866.
+Entrenamiento: Adam (lr 1e-3), lote 128, 4 épocas, semilla 42.
+
+Nota de reproducibilidad: con la misma semilla el resultado es el mismo en una misma máquina
+y versión de PyTorch, pero puede diferir unas décimas entre equipos o versiones (por eso se
+entregan también los pesos ya entrenados, cnn_mnist.pth).
 """
 
 import random
@@ -26,7 +38,7 @@ def fijar_semillas(semilla: int) -> None:
     random.seed(semilla)   #para python
     np.random.seed(semilla)  #para numpy
     torch.manual_seed(semilla) #para PyTorch
-    torch.use_deterministic_algorithms(True) #exige que operaciones utilizadas sean deterministas (no reducción de precisión)
+    torch.use_deterministic_algorithms(True) #obliga a PyTorch a usar solo operaciones deterministas (lanza error si alguna no lo es)
 
 
 class CNNMNIST(nn.Module):
